@@ -7,6 +7,6 @@ import reactor.core.publisher.Mono;
 public interface TransfersService extends CrudService<Transfers, String> {
 
     //Movement
-    Mono<MovementBankAccount> saveMovementSourceAccount(String numberAccount, Float amount);
-    Mono<MovementBankAccount> saveMovementDestinationAccount(String numberAccount, Float amount);
+    Mono<MovementBankAccount> saveMovementAccount(String numberAccount, Double amount, String description);
+
 }

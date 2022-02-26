@@ -41,24 +41,21 @@ public class TransfersServiceImpl implements TransfersService {
         return sourceAccount
                 .filter(c -> c.getBalance() >= entity.getAmount())
                 .flatMap(s -> {
-                    Float nuevoSaldoS = rest.calcular(entity.getAmount(), s.getBalance());
+                    Double nuevoSaldoS = rest.calcular(entity.getAmount(), s.getBalance());
                     s.setBalance(nuevoSaldoS);
                     return destinationAccount
                             .flatMap(d ->{
-                                Float nuevoSaldoD = add.calcular(entity.getAmount(), d.getBalance());
+                                Double nuevoSaldoD = add.calcular(entity.getAmount(), d.getBalance());
                                 d.setBalance(nuevoSaldoD);
                                 webClientConfig.updateBankAccount(s, s.getId()).subscribe();
-                                this.saveMovementSourceAccount(entity.getSourceAccount(), entity.getAmount()).subscribe();
+                                String descriptionSource = "Transferencia a cuenta";
+                                this.saveMovementAccount(entity.getSourceAccount(), entity.getAmount()*-1, descriptionSource).subscribe();
                                 webClientConfig.updateBankAccount(d, d.getId()).subscribe();
-                                this.saveMovementDestinationAccount(entity.getDestinationAccount(), entity.getAmount()).subscribe();
+                                String descriptionDestination = "Transferencia de cuenta";
+                                this.saveMovementAccount(entity.getDestinationAccount(), entity.getAmount(), descriptionDestination).subscribe();
                                 return transfersRepository.save(entity);
                             });
                 }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE)));
-    }
-
-    @Override
-    public Mono<Transfers> update(Transfers entity) {
-        return null;
     }
 
     @Override
@@ -72,22 +69,13 @@ public class TransfersServiceImpl implements TransfersService {
     }
 
     @Override
-    public Mono<MovementBankAccount> saveMovementSourceAccount(String numberAccount, Float amount) {
+    public Mono<MovementBankAccount> saveMovementAccount(String numberAccount, Double amount, String description) {
         MovementBankAccount movementBankAccount = new MovementBankAccount();
         movementBankAccount.setAmount(amount);
-        movementBankAccount.setDescription("Transferencia a cuenta");
+        movementBankAccount.setDescription(description);
         movementBankAccount.setNumberAccount(numberAccount);
         movementBankAccount.setStatus(true);
         return  webClientConfig.saveMovementBankAccount(movementBankAccount);
     }
 
-    @Override
-    public Mono<MovementBankAccount> saveMovementDestinationAccount(String numberAccount, Float amount) {
-        MovementBankAccount movementBankAccount = new MovementBankAccount();
-        movementBankAccount.setAmount(amount);
-        movementBankAccount.setDescription("Transferencia de cuenta");
-        movementBankAccount.setNumberAccount(numberAccount);
-        movementBankAccount.setStatus(true);
-        return  webClientConfig.saveMovementBankAccount(movementBankAccount);
-    }
 }

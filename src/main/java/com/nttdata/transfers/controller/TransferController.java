@@ -21,9 +21,16 @@ public class TransferController {
         System.out.println("Listar transferencias");
         return transfersService.findAll();
     }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Transfers> saveTransfers(@RequestBody Transfers transfers){
         return transfersService.save(transfers);
+    }
+
+    @GetMapping("/delete/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<Transfers> deleteById(@PathVariable String id){
+        return transfersService.deleteById(id);
     }
 }
